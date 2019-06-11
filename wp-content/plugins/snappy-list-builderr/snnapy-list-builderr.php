@@ -278,3 +278,39 @@ function slb_subscriber_has_subscription($subscriber_id, $list_id) {
 
     return $has_subscription;
 }
+
+function slb_get_subscriber_id($email) {
+    $subscriber_id = 0;
+
+    try {
+        // check if subscriber already exists
+        $subscriber_query = new WP_Query(
+            array(
+                'post_type' => 'slb_subscriber',
+                'posts_per_page' => 1,
+                'meta_key' => 'slb_email',
+                'meta_query' => array(
+                    array(
+                        'key' => 'slb_email',
+                        'value' => $email, // or whatever it is you're using here
+                        'compare' => '=',
+                    ),
+                ),
+            )
+        );
+
+        // IF the subscriber exists ...
+        if($subscriber_query->have_posts()):
+            // get the subscriber_id
+            $subscriber_query->the_post();
+            $subscriber_id = get_the_ID();
+        endif;
+    } catch(Exception $e) {
+        // a php error occurred
+    }
+
+    // reset the Wordpress post object
+    wp_reset_query();
+
+    return (int)$subscriber_id;
+}

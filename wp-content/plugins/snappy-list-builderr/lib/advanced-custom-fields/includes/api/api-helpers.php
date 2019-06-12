@@ -3093,9 +3093,9 @@ function acf_upload_file( $uploaded_file ) {
 	
 	// required
 	//require_once( ABSPATH . "/wp-load.php" ); // WP should already be loaded
-	require_once( ABSPATH . "/wp-admin/includes/media.php" ); // video functions
-	require_once( ABSPATH . "/wp-admin/includes/file.php" );
-	require_once( ABSPATH . "/wp-admin/includes/image.php" );
+	require_once(ABSPATH . "/wp-admin/includes/media.php"); // video functions
+	require_once(ABSPATH . "/wp-admin/includes/file.php");
+	require_once(ABSPATH . "/wp-admin/includes/image.php");
 	 
 	 
 	// required for wp_handle_upload() to upload the file
@@ -4489,7 +4489,7 @@ function acf_is_plugin_active() {
 	// ensure is_plugin_active() exists (not on frontend)
 	if( !function_exists('is_plugin_active') ) {
 		
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 		
 	}
 	

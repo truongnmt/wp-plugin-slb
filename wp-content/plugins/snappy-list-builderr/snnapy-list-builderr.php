@@ -38,7 +38,11 @@ add_action('wp_ajax_slb_save_subscription', 'slb_save_subscription'); // admin u
 add_action('wp_enqueue_scripts', 'slb_public_scripts');
 
 
-
+// advanced custom fields settings
+add_filter('acf/settings/path', 'slb_acf_settings_path');
+add_filter('acf/settings/dir', 'slb_acf_settings_dir');
+add_filter('acf/settings/show_admin', 'slb_acf_show_admin');
+//if(!defined('ACF_LITE')) define('ACF_LITE', true); // turn off ACF plugin menu
 
 
 // SHORTCODES
@@ -183,6 +187,9 @@ function slb_list_column_data($column, $post_id) {
 
 
 // EXTERNAL SCRIPTS
+// include ACF
+include_once(plugin_dir_path(__FILE__) . 'lib/advanced-custom-fields/acf.php');
+
 // loads external files into PUBLIC website
 function slb_public_scripts() {
     // register scripts with WordPress's internal library

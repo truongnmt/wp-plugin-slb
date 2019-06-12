@@ -28,6 +28,19 @@ add_action(
 );
 add_filter('manage_slb_list_posts_custom_column', 'slb_list_column_data', 1, 2);
 
+
+// register ajax actions
+add_action('wp_ajax_nopriv_slb_save_subscription', 'slb_save_subscription'); // regular website visitor
+add_action('wp_ajax_slb_save_subscription', 'slb_save_subscription'); // admin user
+
+
+// load external files to public website
+add_action('wp_enqueue_scripts', 'slb_public_scripts');
+
+
+
+
+
 // SHORTCODES
 // registers all our custom shortcodes
 function slb_register_shortcodes() {
@@ -40,6 +53,9 @@ function slb_form_shortcode($args, $content="") {
     $list_id = 0;
     if(isset($args['id'])) $list_id = (int)$args['id'];
 
+    $title = 0;
+    if(isset($args['title'])) $title = (string)$args['title'];
+
     // setout our output variable - the form html
     $output = '
         <div class="slb">
@@ -47,9 +63,13 @@ function slb_form_shortcode($args, $content="") {
             <form id="slb_form" name="slb_form" class="slb-form" method="post"
             action="/wp-admin/admin-ajax.php?action=slb_save_subscription" method="post">
 
-                <input type="hidden" name="slb_list" value="'.$list_id.'">
+                <input type="hidden" name="slb_list" value="'.$list_id.'">';
 
-                <p class="slb-input-container">
+                if(strlen($title)):
+                    $output .= '<h3 class="slb-title">'. $title .'</h3>';
+                endif;
+
+                $output .= '<p class="slb-input-container">
                     <label>Your Name</label><br />
                     <input type="text" name="slb_fname" placeholder="First Name" />
                     <input type="text" name="slb_lname" placeholder="Last Name" />
@@ -142,26 +162,40 @@ function slb_list_column_headers($columns) {
     $columns = array(
         'cb' => '<input type="checkbox" />',
         'title' => __('List Name'),
+        'shortcode' => __('Shortcode'),
     );
 
     // returning new columns
     return $columns;
 }
 
-function slb_listcolumn_data($column, $post_id) {
+function slb_list_column_data($column, $post_id) {
     // setup our return text
     $output = '';
 
     switch($column) {
-        case 'example':
-            // get the custom name data
-            // $fname = get_field('slb_fname', $post_id);
-            // $lname = get_field('slb_lname', $post_id);
-            // $output .= $fname .' '. $lname;
+        case 'shortcode':
+            $output .= '[slb_form id="'. $post_id . '"]';
             break;
     }
     echo $output;
 }
+
+
+// EXTERNAL SCRIPTS
+// loads external files into PUBLIC website
+function slb_public_scripts() {
+    // register scripts with WordPress's internal library
+    wp_register_script('snappy-list-builder-js-public', plugins_url('/js/public/snappy-list-builder.js', __FILE__),
+        array('jquery'), '', true);
+
+    wp_register_style('snappy-list-builder-css-public', plugins_url('/css/public/snappy-list-builder.css', __FILE__));
+
+    // add to que of scripts that get loaded into every page
+    wp_enqueue_script('snappy-list-builder-js-public');
+    wp_enqueue_style('snappy-list-builder-css-public');
+}
+
 
 // ACTIONS
 function slb_save_subscription() {
@@ -404,11 +438,15 @@ function slb_get_subscriber_data($subscriber_id) {
 
     // IF subscriber object is valid
     if(isset($subscriber->post_type) && $subscriber->post_type == 'slb_subscriber'):
+
+        $fname = get_field(slb_get_acf_key('slb_fname'), $subscriber_id);
+        $lname = get_field(slb_get_acf_key('slb_lname'), $subscriber_id);
+
         // build subscriber_data for return
         $subscriber_data = array(
-            'name' => $subscriber->title,
-            'fname' => get_field(slb_get_acf_key('slb_fname'), $subscriber_id),
-            'lname' => get_field(slb_get_acf_key('slb_lname'), $subscriber_id),
+            'name' => $fname. ' ' . $lname,
+            'fname' => $fname,
+            'lname' => $lname,
             'email' => get_field(slb_get_acf_key('slb_email'), $subscriber_id),
             'subscriptions' => slb_get_subscriptions($subscriber_id)
         );

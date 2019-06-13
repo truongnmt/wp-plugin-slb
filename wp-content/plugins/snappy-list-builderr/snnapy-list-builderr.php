@@ -44,6 +44,11 @@ add_filter('acf/settings/dir', 'slb_acf_settings_dir');
 add_filter('acf/settings/show_admin', 'slb_acf_show_admin');
 //if(!defined('ACF_LITE')) define('ACF_LITE', true); // turn off ACF plugin menu
 
+// register our custom menus
+add_action('admin_menu', 'slb_admin_menus');
+
+// load external files into WP admin
+add_action('admin_enqueue_scripts', 'slb_admin_scripts');
 
 // SHORTCODES
 // registers all our custom shortcodes
@@ -185,6 +190,29 @@ function slb_list_column_data($column, $post_id) {
     echo $output;
 }
 
+// registers custom plugin admin menus
+function slb_admin_menus() {
+    // main menu
+    $top_menu_item = 'slb_dashboard_admin_page';
+    add_menu_page('', 'List Builder', 'manage_options', 'slb_dashboard_admin_page', 'slb_dashboard_admin_page', 'dashicons-email-alt');
+
+    // submenu items
+    // dashboard
+    add_submenu_page($top_menu_item, '', 'Dashboard', 'manage_options', $top_menu_item, $top_menu_item);
+
+    // email lists
+    add_submenu_page($top_menu_item, '', 'Email Lists', 'manage_options', 'edit.php?post_type=slb_list');
+
+    // subscribers lists
+    add_submenu_page($top_menu_item, '', 'Subscribers', 'manage_options', 'edit.php?post_type=slb_subscriber');
+
+    // import subscribers
+    add_submenu_page($top_menu_item, '', 'Import Subscribers', 'manage_options', 'slb_import_admin_page', 'slb_import_admin_page');
+
+    // plugin options
+    add_submenu_page($top_menu_item, '', 'Plugin Options', 'manage_options', 'slb_options_admin_page', 'slb_options_admin_page');
+}
+
 
 // EXTERNAL SCRIPTS
 // include ACF
@@ -201,6 +229,16 @@ function slb_public_scripts() {
     // add to que of scripts that get loaded into every page
     wp_enqueue_script('snappy-list-builder-js-public');
     wp_enqueue_style('snappy-list-builder-css-public');
+}
+
+// loads exter files into WP's internal library
+function slb_admin_scripts() {
+    // register scripts with WP's internal library
+    wp_register_script('snappy-list-builder-js-private', plugins_url('/js/private/snappy-list-builder.js', __FILE__), array('jquery'), '', true);
+
+    // add to que of scripts that get loaded into every admin page
+    wp_enqueue_script('snappy-list-builder-js-private');
+
 }
 
 
@@ -462,5 +500,46 @@ function slb_get_subscriber_data($subscriber_id) {
     // return subscriber_data
     return $subscriber_data;
 }
+
+// ADMIN PAGES
+// dashboard admin page
+function slb_dashboard_admin_page() {
+    $output = '
+        <div class="wrap">
+            <h2>Snappy List Builder</h2>
+            <p>The ultimate email list building plugin for WordPress. Capture new subscribers. Reward subscribers with a custom download upon opt-in. Build unlimited lists. Import and export subscribers easily with .csv</p>
+        </div>
+    ';
+
+    echo $output;
+}
+
+// dashboard admin page
+function slb_import_admin_page() {
+    $output = '
+        <div class="wrap">
+            <h2>Impoert Subscribers</h2>
+            <p>Page description ...</p>
+        </div>
+    ';
+
+    echo $output;
+}
+
+// plugin options admin page
+// dashboard admin page
+function slb_options_admin_page() {
+    $output = '
+        <div class="wrap">
+            <h2>Snappy List Builder Options</h2>
+            <p>Page description ...</p>
+        </div>
+    ';
+
+    echo $output;
+}
+
+
+
 
 
